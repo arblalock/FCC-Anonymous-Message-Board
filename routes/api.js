@@ -1,17 +1,9 @@
-/*
-*
-*
-*       Complete the API routing below
-*
-*
-*/
+var express = require('express')
+var router = express.Router()
+var apiController = require('../controllers/apiController')
 
-'use strict'
-
-var expect = require('chai').expect
-
-module.exports = function (app) {
-  app.route('/api/threads/:board')
-
-  app.route('/api/replies/:board')
-}
+router.get('/threads/:board', apiController.getThread)
+router.post('/threads/:board', apiController.postThread)
+router.get('/replies/:board', apiController.getReplies)
+router.post('/replies/:board', apiController.postReplies)
+module.exports = router

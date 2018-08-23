@@ -1,46 +1,37 @@
 'use strict'
-
+try {
+  require('dotenv').config()
+} catch (e) {
+  console.log('no dotenv module')
+}
 var express = require('express')
 var bodyParser = require('body-parser')
-var expect = require('chai').expect
 var cors = require('cors')
-
-var apiRoutes = require('./routes/api.js')
+var helmet = require('helmet')
 var fccTestingRoutes = require('./routes/fcctesting.js')
 var runner = require('./test-runner')
-
+var mongoose = require('mongoose')
+var index = require('./routes/index')
+var api = require('./routes/api')
+var board = require('./routes/board')
 var app = express()
 
 app.use('/public', express.static(process.cwd() + '/public'))
-
 app.use(cors({origin: '*'})) // For FCC testing purposes only
-
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 
-// Sample front-end
-app.route('/b/:board/')
-  .get(function (req, res) {
-    res.sendFile(process.cwd() + '/views/board.html')
-  })
-app.route('/b/:board/:threadid')
-  .get(function (req, res) {
-    res.sendFile(process.cwd() + '/views/thread.html')
-  })
+mongoose.connect(process.env.MONGODB_URI)
+mongoose.Promise = global.Promise
+var db = mongoose.connection
+db.on('error', console.error.bind(console, 'MongoDB connection error:'))
 
-// Index page (static HTML)
-app.route('/')
-  .get(function (req, res) {
-    res.sendFile(process.cwd() + '/views/index.html')
-  })
+app.use('/', index)
+app.use('/api', api)
+app.use('/b', board)
 
 // For FCC testing purposes
 fccTestingRoutes(app)
-
-// Routing for API
-apiRoutes(app)
-
-// Sample Front-end
 
 // 404 Not Found Middleware
 app.use(function (req, res, next) {
@@ -51,7 +42,7 @@ app.use(function (req, res, next) {
 
 // Start our server and tests!
 app.listen(process.env.PORT || 3000, function () {
-  console.log('Listening on port ' + process.env.PORT)
+  console.log('Listening on port ' + (process.env.PORT || 3000))
   if (process.env.NODE_ENV === 'test') {
     console.log('Running Tests...')
     setTimeout(function () {
@@ -66,4 +57,4 @@ app.listen(process.env.PORT || 3000, function () {
   }
 })
 
-module.exports = app // for testing
+module.exports = app
