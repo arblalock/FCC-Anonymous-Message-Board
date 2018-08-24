@@ -11,16 +11,22 @@ exports.getThread = function (req, res, next) {
     .exec()
     .then((result) => {
       let docs = result.map((el) => {
-        let recReplies = el.replies.sort((a, b) => b.created_on - a.created_on).splice(0, 3)
+        let recReplies = el.replies.sort((a, b) => b.created_on - a.created_on).slice(0, 3)
+        let hiddenCount = el.replies.length - 3
+        if (hiddenCount < 1) { hiddenCount = 0 }
         recReplies = recReplies.map(el => (
-          {created_on: el.created_on,
+          {_id: el._id,
+            created_on: el.created_on,
             thread_id: el.thread_id,
             text: el.text})
         )
-        return {created_on: el.created_on,
+        return {
+          _id: el._id,
+          created_on: el.created_on,
           bumped_on: el.bumped_on,
           board: el.board,
           text: el.text,
+          hiddenCount,
           replies: recReplies}
       })
       return res.json(docs)
@@ -34,11 +40,14 @@ exports.getReplies = function (req, res, next) {
     .then((doc) => {
       if (!doc) return res.send('Thread not found')
       let replies = doc.replies.map(el => (
-        {created_on: el.created_on,
+        {_id: el._id,
+          created_on: el.created_on,
           thread_id: el.thread_id,
           text: el.text})
       )
-      let thr = {created_on: doc.created_on,
+      let thr = {
+        _id: doc._id,
+        created_on: doc.created_on,
         bumped_on: doc.bumped_on,
         board: doc.board,
         text: doc.text,
@@ -54,6 +63,7 @@ exports.postThread = function (req, res, next) {
       let nThread = req.body
       nThread.delete_password = hash
       let newThread = thread(nThread)
+      if (!newThread.board) newThread.board = req.params.board
       newThread.board = newThread.board.toLowerCase()
       newThread.save((err, doc) => {
         if (err) return console.error(err)
@@ -151,7 +161,6 @@ exports.deleteReply = function (req, res, next) {
 
 exports.reportThread = function (req, res, next) {
   if (!mongoose.Types.ObjectId.isValid(req.body.thread_id)) return res.send('Invalid ID')
-
   thread.findById(req.body.thread_id).exec()
     .then((doc) => {
       if (!doc) {
