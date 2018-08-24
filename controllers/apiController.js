@@ -58,6 +58,7 @@ exports.getReplies = function (req, res, next) {
 }
 
 exports.postThread = function (req, res, next) {
+  if (!req.body.delete_password) return res.send('need a password')
   bcrypt.hash(req.body.delete_password, Number(process.env.SALT_ROUNDS))
     .then((hash) => {
       let nThread = req.body
@@ -67,7 +68,7 @@ exports.postThread = function (req, res, next) {
       newThread.board = newThread.board.toLowerCase()
       newThread.save((err, doc) => {
         if (err) return console.error(err)
-        return res.redirect(`/b/${doc.board}`)
+        return res.redirect(`/b/${doc.board}?id=${doc._id}`)
       })
     })
     .catch(error => console.error(error))
@@ -76,6 +77,7 @@ exports.postThread = function (req, res, next) {
 exports.postReplies = function (req, res, next) {
   let board = null
   if (!mongoose.Types.ObjectId.isValid(req.body.thread_id)) return res.send('Invalid ID')
+  if (!req.body.delete_password) return res.send('need a password')
   thread.findById(req.body.thread_id).exec()
     .then((doc) => {
       if (!doc) return res.send('Thread not found')
