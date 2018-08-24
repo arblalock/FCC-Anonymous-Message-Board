@@ -35,8 +35,9 @@ exports.getThread = function (req, res, next) {
 }
 
 exports.getReplies = function (req, res, next) {
-  if (!mongoose.Types.ObjectId.isValid(req.query.thread_id)) return res.send('Invalid ID')
-  thread.findById(req.query.thread_id).exec()
+  let thread_id = req.query.thread_id || req.body.thread_id
+  if (!mongoose.Types.ObjectId.isValid(thread_id)) return res.send('Invalid ID')
+  thread.findById(thread_id).exec()
     .then((doc) => {
       if (!doc) return res.send('Thread not found')
       let replies = doc.replies.map(el => (
@@ -153,7 +154,7 @@ exports.deleteReply = function (req, res, next) {
           }
           repl.remove()
           doc.save()
-            .then(() => res.json('success'))
+            .then(() => res.send('success'))
             .catch(error => console.error(error))
         })
         .catch(error => console.error(error))
