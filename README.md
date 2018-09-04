@@ -3,7 +3,7 @@
 **Example:**  
 * https://arblalock-fcc-anonymous-message-board.glitch.me/
 
-**Description:**An anonoymous message board where users can create boards, post/report comments, and remove them.
+**Description:** An anonoymous message board where users can create boards, post/report comments, and remove them.
 * Created with Node and Express.  
 * MongoDB database
 * Chai assertion library functional tests
