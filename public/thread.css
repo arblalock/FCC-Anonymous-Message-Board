@@ -1,3 +1,7 @@
+body{
+  padding: 20px 50px
+}
+
 .main{
   padding: 20px;
   background: rgb(230,230,230)
@@ -6,7 +10,7 @@
   padding: 5px 40px;
 }
 .reply{
-  /* padding: 20px 40px; */
+
   background: rgb(240,240,240);
   padding: 5px 20px;
   margin-bottom: 10px;
